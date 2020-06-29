@@ -13,13 +13,13 @@ for id in motivations
 
 .sheet-motivation
   width 17em
-  borderCommon()
   margin-bottom 1em
-  border-radius 8px
   p
     font-size 14px
     line-height 16px
     font-weight 500
+  .sheet-details-btn
+    margin 0
 
 .sheet-motivation-dropdown
   borderCommon()
@@ -38,4 +38,17 @@ for id in motivations
   -webkit-appearance menulist
 
 .sheet-motivation-container
-  padding 0em 1em 1em 1em
+  padding 1em 1em 1em 1em
+  borderCommon()
+  border-radius 0
+  border-top 0
+
+input.sheet-motivation-details:checked ~ div.sheet-motivation-details
+  display block
+
+.sheet-motivation-name
+  text-align center
+  borderCommon()
+  background #ccc
+  border-radius 0
+  width 100%

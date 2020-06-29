@@ -8,10 +8,11 @@ include ./data/motivation-list
    
 fieldset.repeating_motivations
   div.sheet-motivation
-    select(class='sheet-motivation-dropdown' name='attr_motivation_select')
-      option(value='' disabled selected) SELECT
-        each motivation in motivations
-          option(value=motivation.id)=motivation.text
+    //- select(class='sheet-motivation-dropdown' name='attr_motivation_select')
+    //-   option(value='' disabled selected) SELECT
+    //-     each motivation in motivations
+    //-       option(value=motivation.id)=motivation.text
+    input.sheet-motivation-name(type='text' name='attr_motivation_select' placeholder='Motivation')
 
     each motivation in motivations
       input(
@@ -20,13 +21,18 @@ fieldset.repeating_motivations
         name=`attr_motivation_${motivation.id}`
       )
       div(class=`sheet-motivation-${motivation.id} sheet-motivation-container sheet-hide`)
-        div(class='sheet-motivation-description')
-          p=motivation.description
-        div(class='sheet-motivation-layer')
-          p!=`<strong>Layer 1: </strong>${motivation.layer1}`
-        div(class='sheet-motivation-layer')
-          p!=`<strong>Layer 2: </strong>${motivation.layer2}`
-        div(class='sheet-motivation-layer')
-          p!=`<strong>Layer 3: </strong>${motivation.layer3}`
-        div(class='sheet-motivation-buyoff')
-          p!=`<strong>Buyoff: </strong>${motivation.buyoff}`
+        input.hide.motivation-details(type='checkbox' name='attr_details')
+        div.motivation-details.hide
+          div(class='sheet-motivation-description')
+            p=motivation.description
+          div(class='sheet-motivation-layer')
+            p!=`<strong>Layer 1: </strong>${motivation.layer1}`
+          div(class='sheet-motivation-layer')
+            p!=`<strong>Layer 2: </strong>${motivation.layer2}`
+          div(class='sheet-motivation-layer')
+            p!=`<strong>Layer 3: </strong>${motivation.layer3}`
+          div(class='sheet-motivation-buyoff')
+            p!=`<strong>Buyoff: </strong>${motivation.buyoff}`
+        label.sheet-btn.sheet-details-btn
+          input.sheet-hide.sheet-btn-input(type='checkbox' name='attr_details_button')
+          .sheet-btn-content DETAILS
