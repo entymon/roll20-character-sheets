@@ -17,23 +17,52 @@ function getCurrentProgress (progressValues) {
   return total
 }
 
-function updateProgressValues (newValue) {
-  let progressNumber = 0
-  for (; newValue > 0;) {
-    let updateValue = (newValue < 4) ? newValue : 4
-    let attNumber = progressStrings[progressNumber]
+// function updateProgressValues (newValue, type, boxNumbers) {
+//   let progressNumber = 0
+//   for (; newValue > 0;) {
+//     let updateValue = (newValue < 4) ? newValue : 4
+//     let attNumber = boxNumbers[progressNumber]
+//     setAttrs({
+//       ['repeating_'+ type + '_progress_' + attNumber]: updateValue
+//     })
+//     newValue = newValue - updateValue
+//     progressNumber++
+//   }
+// }
+
+function fillBoxes (filledBoxes, newBoxes, boxNumbers, type) {
+  let nextBox = filledBoxes
+  for (let i = 0; newBoxes > 0; i++) {
     setAttrs({
-      ['repeating_progress_' + 'progress_'+ attNumber]: updateValue
+      ['repeating_'+ type + '_progress_'+ boxNumbers[nextBox]]: 4
     })
-    newValue = newValue - updateValue
-    progressNumber++
+    newBoxes = newBoxes - 1
+    nextBox++
+  }
+  return nextBox
+}
+
+function setRemainder (type, boxNumbers, lastBox, remainder) {
+  if (remainder > 0) {
+    setAttrs({
+      ['repeating_'+ type + '_progress_'+ boxNumbers[lastBox]]: remainder
+    })
   }
 }
 
-function updateProgress (mark, progressArray) {
-  let newValue = mark + getCurrentProgress(progressArray)
-  let finalValue = (newValue < 40) ? newValue : 40
-  updateProgressValues(finalValue)
+function updateProgressValues (previousProgress, finalValue, type, boxNumbers) {
+  const filledBoxes = Math.floor(previousProgress / 4);
+  const newBoxes = Math.floor((finalValue / 4) - filledBoxes);
+  const remainder = finalValue % 4;
+  const lastBox = fillBoxes(filledBoxes, newBoxes, boxNumbers, type)
+  setRemainder(type, boxNumbers, lastBox, remainder)
+}
+
+function updateProgress (mark, progress, type, boxNumbers) {
+  const previousProgress = getCurrentProgress(progress)
+  const totalProgress = mark + previousProgress
+  const finalValue = (totalProgress < 40) ? totalProgress : 40
+  updateProgressValues(previousProgress, finalValue, type, boxNumbers)
 }
 
 function chosenDifficulty (rank) {
@@ -58,53 +87,59 @@ function chosenDifficulty (rank) {
   }
 }
 
+function progressNumbers(type) {
+  return type === 'progress' ? progressStrings : Array(10).fill().map((x,i)=>i)
+}
+
 on('change:repeating_progress:mark_progress change:repeating_vow:mark_progress', function(values) {
   const type = values.sourceAttribute.match(/repeating_(.*?)_/)[1]
+  const boxNumbers = progressNumbers(type)
   getAttrs([
     `repeating_${type}_rank`,
-    `repeating_${type}_progress_${progressStrings[0]}`,
-    `repeating_${type}_progress_${progressStrings[1]}`,
-    `repeating_${type}_progress_${progressStrings[2]}`,
-    `repeating_${type}_progress_${progressStrings[3]}`,
-    `repeating_${type}_progress_${progressStrings[4]}`,
-    `repeating_${type}_progress_${progressStrings[5]}`,
-    `repeating_${type}_progress_${progressStrings[6]}`,
-    `repeating_${type}_progress_${progressStrings[7]}`,
-    `repeating_${type}_progress_${progressStrings[8]}`,
-    `repeating_${type}_progress_${progressStrings[9]}`
+    `repeating_${type}_progress_${boxNumbers[0]}`,
+    `repeating_${type}_progress_${boxNumbers[1]}`,
+    `repeating_${type}_progress_${boxNumbers[2]}`,
+    `repeating_${type}_progress_${boxNumbers[3]}`,
+    `repeating_${type}_progress_${boxNumbers[4]}`,
+    `repeating_${type}_progress_${boxNumbers[5]}`,
+    `repeating_${type}_progress_${boxNumbers[6]}`,
+    `repeating_${type}_progress_${boxNumbers[7]}`,
+    `repeating_${type}_progress_${boxNumbers[8]}`,
+    `repeating_${type}_progress_${boxNumbers[9]}`
   ],
   function(attrValues) {
     const progress = [ 
-      parseInt(attrValues[`repeating_${type}_progress_${progressStrings[0]}`]),
-      parseInt(attrValues[`repeating_${type}_progress_${progressStrings[1]}`]),
-      parseInt(attrValues[`repeating_${type}_progress_${progressStrings[2]}`]),
-      parseInt(attrValues[`repeating_${type}_progress_${progressStrings[3]}`]),
-      parseInt(attrValues[`repeating_${type}_progress_${progressStrings[4]}`]),
-      parseInt(attrValues[`repeating_${type}_progress_${progressStrings[5]}`]),
-      parseInt(attrValues[`repeating_${type}_progress_${progressStrings[6]}`]),
-      parseInt(attrValues[`repeating_${type}_progress_${progressStrings[7]}`]),
-      parseInt(attrValues[`repeating_${type}_progress_${progressStrings[8]}`]),
-      parseInt(attrValues[`repeating_${type}_progress_${progressStrings[9]}`])
+      parseInt(attrValues[`repeating_${type}_progress_${boxNumbers[0]}`]),
+      parseInt(attrValues[`repeating_${type}_progress_${boxNumbers[1]}`]),
+      parseInt(attrValues[`repeating_${type}_progress_${boxNumbers[2]}`]),
+      parseInt(attrValues[`repeating_${type}_progress_${boxNumbers[3]}`]),
+      parseInt(attrValues[`repeating_${type}_progress_${boxNumbers[4]}`]),
+      parseInt(attrValues[`repeating_${type}_progress_${boxNumbers[5]}`]),
+      parseInt(attrValues[`repeating_${type}_progress_${boxNumbers[6]}`]),
+      parseInt(attrValues[`repeating_${type}_progress_${boxNumbers[7]}`]),
+      parseInt(attrValues[`repeating_${type}_progress_${boxNumbers[8]}`]),
+      parseInt(attrValues[`repeating_${type}_progress_${boxNumbers[9]}`])
     ]
     const rank = parseInt(attrValues[`repeating_${type}_rank`])
     const mark = chosenDifficulty(rank)
-    updateProgress(mark, progress)
+    updateProgress(mark, progress, type, boxNumbers)
   });
 });
 
 on('change:repeating_progress:clear_progress change:repeating_vow:clear_progress', function(values) {
   const type = values.sourceAttribute.match(/repeating_(.*?)_/)[1]
+  const boxNumbers = progressNumbers(type)
   setAttrs({ 
-    ['repeating_' + type + '_progress_' + progressStrings[0]]: '0',
-    ['repeating_' + type + '_progress_' + progressStrings[1]]: '0',
-    ['repeating_' + type + '_progress_' + progressStrings[2]]: '0',
-    ['repeating_' + type + '_progress_' + progressStrings[3]]: '0',
-    ['repeating_' + type + '_progress_' + progressStrings[4]]: '0',
-    ['repeating_' + type + '_progress_' + progressStrings[5]]: '0',
-    ['repeating_' + type + '_progress_' + progressStrings[6]]: '0',
-    ['repeating_' + type + '_progress_' + progressStrings[7]]: '0',
-    ['repeating_' + type + '_progress_' + progressStrings[8]]: '0',
-    ['repeating_' + type + '_progress_' + progressStrings[9]]: '0'
+    ['repeating_' + type + '_progress_' + boxNumbers[0]]: '0',
+    ['repeating_' + type + '_progress_' + boxNumbers[1]]: '0',
+    ['repeating_' + type + '_progress_' + boxNumbers[2]]: '0',
+    ['repeating_' + type + '_progress_' + boxNumbers[3]]: '0',
+    ['repeating_' + type + '_progress_' + boxNumbers[4]]: '0',
+    ['repeating_' + type + '_progress_' + boxNumbers[5]]: '0',
+    ['repeating_' + type + '_progress_' + boxNumbers[6]]: '0',
+    ['repeating_' + type + '_progress_' + boxNumbers[7]]: '0',
+    ['repeating_' + type + '_progress_' + boxNumbers[8]]: '0',
+    ['repeating_' + type + '_progress_' + boxNumbers[9]]: '0'
   });
 });
 
